@@ -17,5 +17,6 @@
     "react"
   ],
   "rules": {
+    "no-new": "off"
   }
 }

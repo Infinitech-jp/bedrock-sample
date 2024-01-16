@@ -6,15 +6,22 @@ import {
   UserPoolAuthenticationProvider,
 } from '@aws-cdk/aws-cognito-identitypool-alpha'
 import { type CfnRole } from 'aws-cdk-lib/aws-iam'
-import { localNamePrefix } from '../utils'
+
+export interface AuthProps {
+  namePrefix: string
+}
 
 export class Auth extends Construct {
   public readonly userPool: UserPool
   public readonly client: UserPoolClient
   public readonly idPool: IdentityPool
+  private readonly namePrefix: string
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: AuthProps) {
     super(scope, id)
+
+    const { namePrefix } = props
+    this.namePrefix = namePrefix
 
     // ユーザープールを作成する
     const userPool = this.createUserPool()
@@ -34,10 +41,11 @@ export class Auth extends Construct {
   }
 
   private createUserPool(): UserPool {
-    const userPoolName = `${localNamePrefix}-user-pool`
+    const userPoolName = `${this.namePrefix}-user-pool`
 
     return new UserPool(this, userPoolName, {
       userPoolName,
+      deletionProtection: false,
       selfSignUpEnabled: true,
       signInAliases: {
         username: false,
@@ -47,7 +55,7 @@ export class Auth extends Construct {
   }
 
   private createUserPoolClient(userPool: UserPool): UserPoolClient {
-    const userPoolClientName = `${localNamePrefix}-client`
+    const userPoolClientName = `${this.namePrefix}-client`
 
     return userPool.addClient(userPoolClientName, {
       userPoolClientName,
@@ -56,7 +64,7 @@ export class Auth extends Construct {
   }
 
   private createIdentityPool(userPool: UserPool, client: UserPoolClient): IdentityPool {
-    const identityPoolName = `${localNamePrefix}-id-pool`
+    const identityPoolName = `${this.namePrefix}-id-pool`
 
     return new IdentityPool(this, identityPoolName, {
       identityPoolName,
@@ -76,14 +84,14 @@ export class Auth extends Construct {
     const cfnAuthenticatedRole = idPool.authenticatedRole.node.defaultChild as CfnRole
     cfnAuthenticatedRole.addPropertyOverride(
       'RoleName',
-      `${localNamePrefix}-id-pool-authenticated-role`,
+      `${this.namePrefix}-id-pool-authenticated-role`,
     )
 
     // 未認証ロールのロール名を変更する
     const cfnUnauthenticatedRole = idPool.unauthenticatedRole.node.defaultChild as CfnRole
     cfnUnauthenticatedRole.addPropertyOverride(
       'RoleName',
-      `${localNamePrefix}-id-pool-unauthenticated-role`,
+      `${this.namePrefix}-id-pool-unauthenticated-role`,
     )
   }
 }

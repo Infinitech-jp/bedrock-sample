@@ -2,22 +2,24 @@ import { Construct } from 'constructs'
 import { Duration } from 'aws-cdk-lib'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
-import { localNamePrefix } from '../utils'
 import { type IdentityPool } from '@aws-cdk/aws-cognito-identitypool-alpha'
 import { type CfnRole, Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam'
 
 interface ApiProps {
+  namePrefix: string
   region: string
   idPool: IdentityPool
 }
 
 export class Api extends Construct {
   public readonly predictStreamFunction: NodejsFunction
+  private readonly namePrefix: string
 
   constructor(scope: Construct, id: string, props: ApiProps) {
     super(scope, id)
 
-    const { region, idPool } = props
+    const { region, idPool, namePrefix } = props
+    this.namePrefix = namePrefix
 
     // Bedrock用のLambda関数を作成する
     const predictStreamFunction = this.createPredictStreamFunction(region)
@@ -29,7 +31,7 @@ export class Api extends Construct {
   }
 
   private createPredictStreamFunction(region: string): NodejsFunction {
-    const functionName = `${localNamePrefix}-predict-stream`
+    const functionName = `${this.namePrefix}-predict-stream`
 
     return new NodejsFunction(this, functionName, {
       functionName,
@@ -53,7 +55,7 @@ export class Api extends Construct {
     // ロール名を変更する
     const predictStreamRole = predictStreamFunction.node.findChild('ServiceRole').node
       .defaultChild as CfnRole
-    predictStreamRole.addPropertyOverride('RoleName', `${localNamePrefix}-predict-stream-role`)
+    predictStreamRole.addPropertyOverride('RoleName', `${this.namePrefix}-predict-stream-role`)
 
     // Bedrock を利用できるように権限を付与する
     const bedrockPolicy = new PolicyStatement({

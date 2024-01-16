@@ -26,7 +26,7 @@ Amazon Bedrock を利用したサンプルアプリケーションです。
   - ライブラリをインストールする
     - `npm ci`
   - デプロイする
-    - `cdk deploy`
+    - `cdk deploy LocalBedrockSampleStack`
     - 途中でデプロイ確認が入るので、`y`を入力する
   - デプロイが完了したら、出力されたCognito情報、Lambda情報をメモする
     - `Outputs:`
@@ -61,7 +61,7 @@ Amazon Bedrock を利用したサンプルアプリケーションです。
   - cdkディレクトリに移動する
     - `cd cdk`
   - デプロイしたリソースを削除する
-    - `cdk destroy`
+    - `cdk destroy LocalBedrockSampleStack`
     - 途中で削除確認が入るので、`y`を入力する
   - 念の為、AWSコンソールから以下を確認する
     - Cognitoユーザープール
@@ -71,3 +71,50 @@ Amazon Bedrock を利用したサンプルアプリケーションです。
   - CloudWatch Logsからロググループを削除する
     - CloudWatch Logsは自動で作成されているため、手動で削除する
       - /aws/lambda/bedrock-sample-local-predict-stream
+
+---
+
+## AWS環境
+
+![bedrock-aws.png](docs%2Fbedrock-aws.png)
+
+### 前提条件
+
+AWS環境にデプロイするためには以下の条件が必要です。
+
+- Node.jsがインストールされていること
+- AWSのクレデンシャルがローカル環境で利用できること
+- AWS CDKツールキットがインストールされていること
+- Dockerがインストールされていて、起動されていること
+  - AWS CDKがDockerイメージを作成するために必要です
+
+### AWS環境の構築
+
+- ルートディレクトリで以下を実行する（別で実行していた場合は不要です）
+  - `npm ci`
+- AWS環境の構築
+  - cdkディレクトリに移動する
+    - `cd cdk`
+  - ライブラリをインストールする（別で実行していた場合は不要です）
+    - `npm ci`
+  - デプロイする
+    - `cdk deploy AwsBedrockSampleStack`
+    - 途中でデプロイ確認が入るので、`y`を入力する
+
+### AWS環境の削除
+
+- cdkディレクトリに移動する
+  - `cd cdk`
+- デプロイしたリソースを削除する
+  - `cdk destroy AwsBedrockSampleStack`
+  - 途中で削除確認が入るので、`y`を入力する
+- 念の為、AWSコンソールから以下を確認する
+  - Cognitoユーザープール
+  - CognitoIDプール
+  - Lambda関数
+  - CloudFront
+  - S3バケット
+  - IAMロール、ポリシー
+- CloudWatch Logsからロググループを削除する
+  - CloudWatch Logsは自動で作成されているため、手動で削除する
+  - /aws/lambda/bedrock-sample-local-predict-stream
